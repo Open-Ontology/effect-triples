@@ -18,7 +18,7 @@ import { MIGRATIONS_TABLE_DDL } from "../src/schema.js";
 import { makeMockDOState } from "./fixtures/MockDOState.js";
 
 describe("public Cloudflare runtime", () => {
-  it("upgrades a v1 database without losing facts and applies v2 once", async () => {
+  it("upgrades a v1 database without losing facts and applies upgrades once", async () => {
     const state = makeMockDOState();
     const sql = state.storage.sql;
     sql.exec(MIGRATIONS_TABLE_DDL);
@@ -45,7 +45,10 @@ describe("public Cloudflare runtime", () => {
     expect(await Effect.runPromise(adapter.getByEntity("existing"))).toHaveLength(1);
     expect(
       sql.exec("SELECT version FROM triplex_schema_migrations ORDER BY version").toArray(),
-    ).toEqual([{ version: 1 }, { version: 2 }]);
+    ).toEqual([{ version: 1 }, { version: 2 }, { version: 3 }]);
+    expect(
+      sql.exec("SELECT name FROM sqlite_master WHERE name = 'idx_attr_numeric'").toArray(),
+    ).toHaveLength(1);
     expect(sql.exec("SELECT * FROM entity_snapshots").toArray()).toEqual([]);
   });
   it("passes shared conformance through the public builder", async () => {

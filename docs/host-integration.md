@@ -146,8 +146,33 @@ from the host's deployment process against the same database or scoped schema be
 an unmigrated runtime. Triplex records its state in `triplex_schema_migrations`, avoiding the
 host's migration table.
 
-Triplex currently publishes one complete greenfield v1 schema. It does not upgrade databases
-created by unpublished development builds. A host adopting an existing EAV store should rehearse
+SQL migration v1 is the baseline; additive v2 creates the shared numeric/datetime expression
+index. Cloudflare has a separate sequence: v2 adds snapshots and v3 adds the same numeric index.
+Existing baseline databases upgrade in place; applied versions are skipped on subsequent runs.
+The baseline definitions are unchanged. `INDEX_DDLS` and `INDEX_NAMES` describe all current indexes,
+including the new index, so SQLite bulk-load index rebuilding preserves it.
+
+Use the exported `runMigrations` Effect with the host's `SqlClient` at deployment/provisioning
+time, or execute the ordered `migrations` with the host's migration tooling. Convenience layers
+apply pending migrations on startup; unmigrated layers and `layerFromSqlClient` leave DDL to the
+host. KV needs no schema migration for this change.
+
+Index creation scans existing numeric facts and adds storage/write cost, including retained
+history. The default migration uses ordinary `CREATE INDEX`, which can block writes; serialize
+migration execution and schedule it appropriately for large databases. PostgreSQL hosts that
+need an online build can pre-create the exact index with `CREATE INDEX CONCURRENTLY` outside a
+transaction, verify that the index is valid, then run the migration to record its version.
+`IF NOT EXISTS` checks the name, not the definition or validity: reserve `idx_attr_numeric` for
+Triplex and resolve any conflicting or invalid index before migrating.
+
+Runfold can remove its `runfold_actor_due` DDL after deploying this Triplex version and applying
+the migration to every database. Triplex does not drop that host-owned index; dropping an existing
+redundant index is a separate host migration. Older binaries can read the additive schema, but
+old SQLite bulk-loading code that drops/rebuilds only its known indexes cannot suspend maintenance
+of the new index. Deploy the migration and updated runtime together when using bulk loading.
+See [numeric query plans and indexing scope](/datalog-performance#numeric-ranges-and-actor-due-work).
+
+Triplex does not upgrade databases created by unpublished development builds. A host adopting an existing EAV store should rehearse
 the copy against production-shaped data, preserve every assertion and retraction, rebuild journal
 positions deterministically, and compare live and historical reads before cutover.
 

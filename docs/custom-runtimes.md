@@ -256,7 +256,7 @@ and change events. Test those boundaries for each new adapter.
 ## Existing backends and release sequencing
 
 `makeCloudflareRuntime` is the executable example: the Cloudflare package now uses public core
-and SQL exports. Its additive v2 migration creates snapshot tables for existing v1 databases.
+and SQL exports. Its additive v2 migration creates snapshot tables for existing v1 databases; v3 adds the numeric range index.
 It does not backfill existing entities; use `SnapshotWriter.backfill()` if those projections are needed.
 `CloudflareTriples.layer` remains a convenience API with an explicit `Capabilities.none`; its old
 string scope is wrapped in the new versioned identity format. Previously issued Cloudflare cursors

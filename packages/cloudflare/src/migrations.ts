@@ -1,10 +1,11 @@
 import {
   COMMAND_RECEIPTS_TABLE_DDL,
   COMMIT_POSITION_TABLE_DDL,
-  INDEX_DDLS,
+  BASELINE_INDEX_DDLS,
   TRIPLES_TABLE_DDL,
 } from "./schema.js";
 import {
+  NUMERIC_VALUE_INDEX_DDL,
   ENTITY_BLOBS_TABLE_DDL,
   ENTITY_SNAPSHOTS_TABLE_DDL,
   SNAPSHOT_INDEX_DDLS,
@@ -20,11 +21,21 @@ export const migrations: readonly Migration[] = [
   {
     version: 1,
     name: "triplex_baseline",
-    up: [TRIPLES_TABLE_DDL, ...INDEX_DDLS, COMMIT_POSITION_TABLE_DDL, COMMAND_RECEIPTS_TABLE_DDL],
+    up: [
+      TRIPLES_TABLE_DDL,
+      ...BASELINE_INDEX_DDLS,
+      COMMIT_POSITION_TABLE_DDL,
+      COMMAND_RECEIPTS_TABLE_DDL,
+    ],
   },
   {
     version: 2,
     name: "triplex_entity_snapshots",
     up: [ENTITY_BLOBS_TABLE_DDL, ENTITY_SNAPSHOTS_TABLE_DDL, ...SNAPSHOT_INDEX_DDLS],
+  },
+  {
+    version: 3,
+    name: "triplex_numeric_value_index",
+    up: [NUMERIC_VALUE_INDEX_DDL],
   },
 ];

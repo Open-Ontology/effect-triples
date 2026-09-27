@@ -43,10 +43,10 @@ work that is not complete.
 - A backend-neutral configuration-derived HTTP package with exact-keyword runtime schemas, REST
   CRUD, OpenAPI, immutable version resolution, host authorization, bounded exact-cut pages, and
   atomic constraint-enforced writes over both in-memory KV and SQLite.
-- One greenfield SQL v1 migration, host-owned migration entrypoints, Changesets configuration and
+- A baseline SQL v1 migration, additive v2 numeric range index, host-owned migration entrypoints, Changesets configuration and
   release automation, dist-only exports, package tarball checks (including the installed CLI), and
   Effect dependencies aligned through the root pnpm catalog.
-- An additive Cloudflare v2 migration for snapshot tables, and a Cloudflare runtime implementation
+- Additive Cloudflare v2 snapshot and v3 numeric index migrations, and a Cloudflare runtime implementation
   using only public core and SQL exports. Existing facts are preserved; snapshot backfill is
   explicit, and pre-upgrade Cloudflare pagination cursors must be restarted.
 - PostgreSQL layers for standalone pools, an ambient host-owned `SqlClient`, and validated

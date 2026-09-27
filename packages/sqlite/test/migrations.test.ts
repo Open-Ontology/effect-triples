@@ -38,8 +38,8 @@ describe("host-owned SQLite migrations", () => {
     );
 
     expect(result.before).toHaveLength(0);
-    expect(migrations.map(({ version }) => version)).toEqual([1]);
-    expect(result.applied.map(({ version }) => version)).toEqual([1]);
+    expect(migrations.map(({ version }) => version)).toEqual([1, 2]);
+    expect(result.applied.map(({ version }) => version)).toEqual([1, 2]);
     expect(result.columns.map(({ name }) => name)).toEqual(
       expect.arrayContaining([
         "recorded_at",
@@ -58,15 +58,21 @@ describe("host-owned SQLite migrations", () => {
       expect.arrayContaining(["command_id", "transaction_id", "recorded_at"]),
     );
     expect(result.indexes.map(({ name }) => name)).toEqual(
-      expect.arrayContaining(["idx_attribute_history", "idx_attribute_temporal"]),
+      expect.arrayContaining([
+        "idx_attribute_history",
+        "idx_attribute_temporal",
+        "idx_attr_numeric",
+      ]),
     );
   });
 
-  it("treats an existing v1 database as current and preserves its data", async () => {
+  it("upgrades an existing v1 database once and preserves its data", async () => {
     const result = await runUnmigrated(
       Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
-        yield* runMigrations;
+        for (const statement of migrations[0]!.up) yield* sql.unsafe(statement);
+        yield* sql`CREATE TABLE triplex_schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at BIGINT NOT NULL)`;
+        yield* sql`INSERT INTO triplex_schema_migrations VALUES (1, 'triplex_baseline', 0)`;
         yield* sql`
           INSERT INTO triples (
             id, entity_id, attribute, value_type, value_string,
@@ -79,6 +85,11 @@ describe("host-owned SQLite migrations", () => {
 
         yield* runMigrations;
 
+        yield* runMigrations;
+        const indexes = yield* sql`SELECT name FROM sqlite_master WHERE name = 'idx_attr_numeric'`;
+        expect(indexes).toHaveLength(1);
+        const applied = yield* sql`SELECT version FROM triplex_schema_migrations ORDER BY version`;
+        expect(applied).toEqual([{ version: 1 }, { version: 2 }]);
         return yield* sql<{ value_string: string }>`
           SELECT value_string FROM triples WHERE entity_id = 'migration:entity'
         `;
