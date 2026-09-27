@@ -3,7 +3,8 @@ import { SqlClient } from "effect/unstable/sql";
 import { MigrationError } from "@triplex-build/triplex/internal";
 import {
   TRIPLES_TABLE_DDL,
-  INDEX_DDLS,
+  BASELINE_INDEX_DDLS,
+  NUMERIC_VALUE_INDEX_DDL,
   ENTITY_BLOBS_TABLE_DDL,
   ENTITY_SNAPSHOTS_TABLE_DDL,
   SNAPSHOT_INDEX_DDLS,
@@ -18,10 +19,11 @@ export interface Migration {
 }
 
 /**
- * The complete greenfield Triplex schema.
+ * The baseline Triplex schema and ordered additive upgrades.
  *
  * DDL is imported from schema.ts so explicit host-owned migration execution and
- * convenience auto-migration use the same single v1 definition.
+ * convenience auto-migration use the same definitions. The baseline stays
+ * unchanged for existing v1 databases.
  */
 export const migrations: readonly Migration[] = [
   {
@@ -29,13 +31,18 @@ export const migrations: readonly Migration[] = [
     name: "triplex_baseline",
     up: [
       TRIPLES_TABLE_DDL,
-      ...INDEX_DDLS,
+      ...BASELINE_INDEX_DDLS,
       ENTITY_BLOBS_TABLE_DDL,
       ENTITY_SNAPSHOTS_TABLE_DDL,
       ...SNAPSHOT_INDEX_DDLS,
       COMMIT_POSITION_TABLE_DDL,
       COMMAND_RECEIPTS_TABLE_DDL,
     ],
+  },
+  {
+    version: 2,
+    name: "triplex_numeric_value_index",
+    up: [NUMERIC_VALUE_INDEX_DDL],
   },
 ];
 

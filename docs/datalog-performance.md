@@ -94,3 +94,82 @@ EXPLAIN ANALYZE with buffer statistics. Backend suites can also use an explicitl
 ```sh
 PG_TEST_URL=postgresql://localhost/triplex_test pnpm test:postgres:integration
 ```
+
+## Numeric ranges and actor due-work
+
+Triplex provisions `idx_attr_numeric` on `(attribute, COALESCE(value_number, value_datetime))`
+for facts whose `value_type` is `number` or `datetime`. It matches the compiler's existing scalar
+expression: both storage types compare numerically, and equal numeric values still collapse in
+Datalog projections. The existing number-only index remains available for typed storage reads.
+
+This covers [Runfold PR #4](https://github.com/bjacobso/runfold/pull/4)'s `src/actor.ts` due-work
+query without an application index declaration or per-actor DDL:
+
+```ts check
+import { Effect } from "effect";
+import { Triples } from "@triplex-build/triplex";
+
+const dueRows = (attribute: string, marker: string, now: number) =>
+  Effect.gen(function* () {
+    const triples = yield* Triples;
+    return yield* triples.query(
+      {
+        find: ["?item", "?actor", "?due"],
+        where: [
+          ["?item", attribute, "?due"],
+          ["<=", "?due", now],
+          ["?item", marker, "?actor"],
+        ],
+        orderBy: [{ variable: "?due", direction: "asc" }],
+        limit: 128,
+      },
+      { pageSize: 128 },
+    );
+  });
+```
+
+`limit` is the logical result bound; `pageSize` controls the public page. Without the explicit
+`pageSize`, current Triplex returns up to 100 rows and a continuation even with `limit: 128`.
+
+Unlike Runfold's `runfold_actor_due` workaround, this index includes retracted numeric facts.
+`Triples.query` pins a recorded position and time, and can see facts retracted after that snapshot.
+A partial index restricted to `retracted_at IS NULL` cannot serve those reads. Valid-time and
+recorded-time predicates remain residual filters; the index does not change visibility.
+
+The regression fixture has 10,000 pending items: 160 due, 9,840 future, alternating numeric and
+datetime storage, plus 80 retracted numeric facts and 10,000 pending markers. After `ANALYZE`,
+SQLite and PostgreSQL select the expression index with **both attribute equality and a numeric
+range bound**, for live reads and the actual SQL emitted by `Triples.query`. PostgreSQL's bitmap
+index scan visits 240 numeric candidates (160 live plus 80 historical), excluding the 9,840 future
+values. Removing the new index restores an attribute/temporal scan: PostgreSQL's snapshot
+query reads 10,080 due-attribute candidates and filters out 9,920 of them. SQLite likewise switches
+from the expression range to `idx_attribute_history` for snapshot pages. The regression tests
+assert a numeric range in the index condition, not merely that an index exists.
+
+These are local plan observations, not a promise of a particular plan on every dataset.
+The PostgreSQL planner may still scan pending markers for its join. Both backends still sort and
+deduplicate; a 128-row limit does not guarantee only 128 facts are examined. Dense due queues and
+large numeric histories need their own measurements. KV retains equivalent results using its
+existing executor and does not gain a SQL-style range-plan optimization.
+
+To inspect the plans, run these tests with `TRIPLEX_EXPLAIN=1` (add `--disableConsoleIntercept`
+if the test reporter suppresses output):
+
+```sh
+TRIPLEX_EXPLAIN=1 pnpm --filter @triplex-build/triplex-sqlite exec vitest run test/numeric-index.test.ts
+PG_TEST_URL=postgresql://localhost/disposable_test TRIPLEX_EXPLAIN=1 pnpm --filter @triplex-build/triplex-postgres exec vitest run test/integration/postgresql.test.ts -t 'expression range' --disableConsoleIntercept
+```
+
+### Scope of consumer indexing
+
+This change takes the core-index route rather than adding a new portable declaration API: the
+concrete due-work requirement is shared by numeric Datalog queries across attributes. Consumers
+express the query through the same backend-portable `Triples` API and provision its index once
+through the [migration API](/host-integration#host-controlled-migrations).
+
+Triplex does **not** yet expose arbitrary consumer index declarations. Workloads needing narrower
+attribute-specific indexes, compound application projections, custom uniqueness, or text search
+still need a separate design. Host-owned SQL DDL remains a backend-specific escape hatch at
+provisioning/migration time; it is not a portable indexing contract. A future declaration API
+must define backend capabilities, unsupported requirements, naming, changes/removal, and migration
+ownership, including KV behavior. Do not create indexes per actor, request, or query.

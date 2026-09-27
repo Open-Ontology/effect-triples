@@ -81,6 +81,129 @@ export interface ConformanceCase {
  */
 export const triplesConformanceCases: readonly ConformanceCase[] = [
   {
+    name: "actor due-work ranges preserve numeric aliases, visibility, ordering, and limits",
+    run: Effect.gen(function* () {
+      const t = yield* Triples;
+      const due = ":conf/actor-due";
+      const pending = ":conf/actor-pending";
+      const facts = yield* t.assertBatch(
+        Array.from({ length: 180 }, (_, index) => index + 1).flatMap((value) => [
+          {
+            entityId: eid(`conf:due:${value}`),
+            attribute: due,
+            value: value % 2 === 0 ? datetime(value) : number(value),
+            validFrom: 1,
+          },
+          {
+            entityId: eid(`conf:due:${value}`),
+            attribute: pending,
+            value: ref("conf:actor"),
+            validFrom: 1,
+          },
+        ]),
+      );
+      // Scalar aliases on the same item must collapse under DISTINCT.
+      yield* t.assert({
+        entityId: eid("conf:due:80"),
+        attribute: due,
+        value: number(80),
+        validFrom: 1,
+      });
+      for (const [suffix, value, validFrom, validTo] of [
+        ["text", string("0"), 1, undefined],
+        ["boolean", boolean(false), 1, undefined],
+        ["future-valid", number(0), 3_000, undefined],
+        ["expired", datetime(0), 1, 2_000],
+      ] as const) {
+        yield* t.assertBatch([
+          {
+            entityId: eid(`conf:due:${suffix}`),
+            attribute: due,
+            value,
+            validFrom,
+            ...(validTo === undefined ? {} : { validTo }),
+          },
+          {
+            entityId: eid(`conf:due:${suffix}`),
+            attribute: pending,
+            value: ref("conf:actor"),
+            validFrom: 1,
+          },
+        ]);
+      }
+      const query = {
+        find: ["?item", "?actor", "?due"],
+        where: [
+          ["?item", due, "?due"],
+          ["<=", "?due", 160],
+          ["?item", pending, "?actor"],
+        ],
+        orderBy: [{ variable: "?due", direction: "asc" }],
+        limit: 128,
+      } as const;
+      const options = { basis: { validAt: 2_000 }, pageSize: 128 };
+      const first = yield* t.query(query, options);
+      yield* check(first.results.length === 128, "due-work must honor the explicit 128-row page");
+      yield* check(
+        first.results.every(
+          (row, index) => row["?due"] === index + 1 && row["?actor"] === "conf:actor",
+        ),
+        "numbers and datetimes must sort together and exclude nonnumeric/invisible facts",
+      );
+      const page = yield* t.query(query, { basis: options.basis });
+      yield* check(
+        page.results.length === 100 && page.nextCursor !== undefined,
+        "logical limit must retain the default 100-row page size",
+      );
+      // Retract a due fact and a pending marker after capturing the first page.
+      yield* t.retract(
+        facts.find((fact) => fact.entityId === "conf:due:110" && fact.attribute === due)!.id,
+      );
+      yield* t.retract(
+        facts.find((fact) => fact.entityId === "conf:due:111" && fact.attribute === pending)!.id,
+      );
+      const continuation = yield* t.query(query, { cursor: page.nextCursor! });
+      yield* check(
+        continuation.results.length === 28 &&
+          continuation.results.every((row, index) => row["?due"] === index + 101),
+        "snapshot continuation must preserve subsequently retracted due and marker facts",
+      );
+      const current = yield* t.query(query, options);
+      const expected = Array.from({ length: 130 }, (_, index) => index + 1).filter(
+        (value) => value !== 110 && value !== 111,
+      );
+      yield* check(
+        JSON.stringify(current.results.map((row) => row["?due"])) === JSON.stringify(expected),
+        "fresh due-work reads must exclude retractions before applying the limit",
+      );
+      for (const [operator, cutoff, expectedValues] of [
+        ["<", 2, [1]],
+        ["<=", 2, [1, 2]],
+        [">", 179, [180]],
+        [">=", 179, [180, 179]],
+      ] as const) {
+        const result = yield* t.query(
+          {
+            ...query,
+            where: [
+              ["?item", due, "?due"],
+              [operator, "?due", cutoff],
+              ["?item", pending, "?actor"],
+            ],
+            orderBy: [{ variable: "?due", direction: operator.startsWith(">") ? "desc" : "asc" }],
+            limit: 2,
+          },
+          options,
+        );
+        yield* check(
+          JSON.stringify(result.results.map((row) => row["?due"])) ===
+            JSON.stringify(expectedValues),
+          `numeric ${operator} must preserve boundaries and direction`,
+        );
+      }
+    }),
+  },
+  {
     name: "Datalog reads are bounded by default and cursors traverse the complete snapshot",
     run: Effect.gen(function* () {
       const t = yield* Triples;

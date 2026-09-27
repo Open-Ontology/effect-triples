@@ -5,12 +5,14 @@ import { INDEX_NAMES, migrations, packValue } from "../src/index.js";
 
 describe("SQL package contract", () => {
   it("keeps migration versions ordered and index declarations complete", () => {
-    expect(migrations.map((migration) => migration.version)).toEqual([1]);
+    expect(migrations.map((migration) => migration.version)).toEqual([1, 2]);
     expect(new Set(migrations.flatMap((migration) => migration.up)).size).toBe(
       migrations.flatMap((migration) => migration.up).length,
     );
     for (const name of INDEX_NAMES) {
-      expect(migrations[0]?.up.some((statement) => statement.includes(name))).toBe(true);
+      expect(migrations.flatMap(({ up }) => up).some((statement) => statement.includes(name))).toBe(
+        true,
+      );
     }
   });
 

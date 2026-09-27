@@ -1,3 +1,5 @@
+import { NUMERIC_VALUE_INDEX_DDL } from "@triplex-build/triplex-sql";
+
 /**
  * Cloudflare database schema support.
  *
@@ -53,7 +55,7 @@ export const COMMAND_RECEIPTS_TABLE_DDL = `
   )
 `;
 
-export const INDEX_DDLS = [
+export const BASELINE_INDEX_DDLS = [
   "CREATE INDEX IF NOT EXISTS idx_entity ON triples(entity_id) WHERE retracted_at IS NULL",
   "CREATE INDEX IF NOT EXISTS idx_attribute ON triples(attribute) WHERE retracted_at IS NULL",
   "CREATE INDEX IF NOT EXISTS idx_attribute_history ON triples(attribute, recorded_position, retracted_position)",
@@ -68,6 +70,8 @@ export const INDEX_DDLS = [
   "CREATE INDEX IF NOT EXISTS idx_tx_id ON triples(tx_id) WHERE retracted_at IS NULL",
 ] as const;
 
+export const INDEX_DDLS = [...BASELINE_INDEX_DDLS, NUMERIC_VALUE_INDEX_DDL] as const;
+
 export const INDEX_NAMES = [
   "idx_entity",
   "idx_attribute",
@@ -76,6 +80,7 @@ export const INDEX_NAMES = [
   "idx_type",
   "idx_attr_string",
   "idx_attr_number",
+  "idx_attr_numeric",
   "idx_ref_target",
   "idx_temporal",
   "idx_recorded_position",

@@ -94,7 +94,7 @@ export const COMMAND_RECEIPTS_TABLE_DDL = `
 // =============================================================================
 
 /**
- * All index definitions for the triples table.
+ * Frozen v1 index definitions for the triples table.
  *
  * These indexes optimize common query patterns:
  * - Entity lookups (idx_entity)
@@ -106,7 +106,7 @@ export const COMMAND_RECEIPTS_TABLE_DDL = `
  * - Entity+attribute lookups (idx_entity_attr)
  * - Transaction queries (idx_tx_id)
  */
-export const INDEX_DDLS = [
+export const BASELINE_INDEX_DDLS = [
   "CREATE INDEX IF NOT EXISTS idx_entity ON triples(entity_id) WHERE retracted_at IS NULL",
   "CREATE INDEX IF NOT EXISTS idx_attribute ON triples(attribute) WHERE retracted_at IS NULL",
   "CREATE INDEX IF NOT EXISTS idx_attribute_history ON triples(attribute, recorded_position, retracted_position)",
@@ -122,6 +122,15 @@ export const INDEX_DDLS = [
 ] as const;
 
 /**
+ * Matches Datalog's shared number/datetime scalar expression. Include retracted
+ * facts: snapshot-pinned pages can still see them at an earlier commit position.
+ */
+export const NUMERIC_VALUE_INDEX_DDL =
+  "CREATE INDEX IF NOT EXISTS idx_attr_numeric ON triples(attribute, COALESCE(value_number, value_datetime)) WHERE value_type IN ('number', 'datetime')";
+
+export const INDEX_DDLS = [...BASELINE_INDEX_DDLS, NUMERIC_VALUE_INDEX_DDL] as const;
+
+/**
  * Index names for drop/recreate operations during bulk loading
  */
 export const INDEX_NAMES = [
@@ -132,6 +141,7 @@ export const INDEX_NAMES = [
   "idx_type",
   "idx_attr_string",
   "idx_attr_number",
+  "idx_attr_numeric",
   "idx_ref_target",
   "idx_temporal",
   "idx_recorded_position",

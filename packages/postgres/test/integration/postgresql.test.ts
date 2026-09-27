@@ -11,6 +11,7 @@
  *   pnpm test --filter @triplex-build/triplex-postgres -- test/integration/postgresql.test.ts
  */
 
+import { numericIndexPlan } from "../../../../test/fixtures/numeric-index.js";
 import { describe, it, expect } from "vitest";
 import { Context, Effect, Layer, Redacted } from "effect";
 import { SqlClient } from "effect/unstable/sql";
@@ -36,6 +37,7 @@ import {
   DatabaseManagerLive,
   DatabaseRegistryLive,
   runMigrations,
+  migrations,
 } from "@triplex-build/triplex-sql";
 import {
   databaseToSchema,
@@ -95,6 +97,48 @@ const prepareHostTables = Effect.gen(function* () {
 });
 
 describe("PostgreSQL Integration", () => {
+  it.skipIf(!DOCKER_AVAILABLE)(
+    "uses an expression range index for live and snapshot actor due-work",
+    { timeout: 120_000 },
+    async () => {
+      await runWithHostSql(numericIndexPlan("postgres"));
+    },
+  );
+  it.skipIf(!DOCKER_AVAILABLE)(
+    "upgrades an existing v1 schema once without losing data",
+    { timeout: 120_000 },
+    async () => {
+      await runWithHostSql(
+        Effect.gen(function* () {
+          const sql = yield* SqlClient.SqlClient;
+          yield* sql.withTransaction(
+            Effect.gen(function* () {
+              yield* sql`CREATE SCHEMA numeric_index_upgrade`;
+              yield* sql`SET LOCAL search_path TO numeric_index_upgrade`;
+              for (const statement of migrations[0]!.up) yield* sql.unsafe(statement);
+              yield* sql`CREATE TABLE triplex_schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at BIGINT NOT NULL)`;
+              yield* sql`INSERT INTO triplex_schema_migrations VALUES (1, 'triplex_baseline', 0)`;
+              yield* sql`INSERT INTO triples (id, entity_id, attribute, value_type, value_number, recorded_at, recorded_position, valid_from) VALUES ('old', 'old', ':due', 'number', 42, 1, 1, 1)`;
+              expect(
+                yield* sql`SELECT indexname FROM pg_indexes WHERE schemaname = 'numeric_index_upgrade' AND indexname = 'idx_attr_numeric'`,
+              ).toHaveLength(0);
+              yield* runMigrations;
+              yield* runMigrations;
+              expect(
+                yield* sql`SELECT version FROM triplex_schema_migrations ORDER BY version`,
+              ).toEqual([{ version: 1 }, { version: 2 }]);
+              expect(yield* sql`SELECT value_number FROM triples`).toEqual([{ value_number: 42 }]);
+              expect(
+                yield* sql`SELECT indexname FROM pg_indexes WHERE schemaname = 'numeric_index_upgrade' AND indexname = 'idx_attr_numeric'`,
+              ).toHaveLength(1);
+              yield* sql`DROP SCHEMA numeric_index_upgrade CASCADE`;
+            }),
+          );
+        }),
+      );
+    },
+  );
+
   // Helper to run effects with PostgreSQL via testcontainers
   const runWithPostgres = <A, E>(effect: Effect.Effect<A, E, Triples>) =>
     Effect.runPromise(Effect.provide(effect, PgTestLayer));
