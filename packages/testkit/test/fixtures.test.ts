@@ -22,7 +22,8 @@ describe("database-testkit", () => {
   });
 
   describe("Triples conformance (in-memory KV)", () => {
-    it("passes the full conformance suite", async () => {
+    // Runs the entire corpus serially in one test, which has outgrown Vitest's 5s default on CI.
+    it("passes the full conformance suite", { timeout: 30_000 }, async () => {
       await Effect.runPromise(makeTriplesConformanceSuite().pipe(Effect.provide(KvTriples.layer)));
     });
 
