@@ -1,6 +1,12 @@
 # @triplex-build/triplex
 
-An Effect-native fact database with Datalog and typed, content-addressed configuration.
+The database that remembers why: an embedded fact database for TypeScript back-office systems,
+built on Effect. Every write records who made it, which versioned rules governed it, and when it
+was true, so audit questions and open work become queries.
+
+Coding agents should start with the
+[modeling guide](https://triplex.build/agents) or the Markdown documentation index at
+[`triplex.build/llms.txt`](https://triplex.build/llms.txt).
 
 The platform-neutral core includes temporal triples, an in-memory ordered-KV hexastore,
 Datalog querying, subscriptions, entity snapshots, configuration releases,

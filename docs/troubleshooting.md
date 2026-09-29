@@ -1,3 +1,7 @@
+---
+description: Answers to common failures, including npm 404s, missing Effect services, empty queries, 100-row pages, which clock to set, duplicate command IDs, unenforced constraints, and stale projections.
+---
+
 # Troubleshooting and FAQ
 
 ## Why does npm return 404 for a Triplex package?
