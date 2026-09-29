@@ -1,0 +1,13 @@
+[
+  {
+    "on": "2026-03-03",
+    "open": [{ "?worker": "worker:maria", "?site": "site:harbor" }],
+    "recheckOn": "2026-03-05"
+  },
+  { "on": "2026-04-01", "open": [], "recheckOn": "2026-06-01" },
+  {
+    "on": "2026-06-01",
+    "open": [{ "?worker": "worker:maria", "?site": "site:harbor" }],
+    "recheckOn": null
+  }
+]

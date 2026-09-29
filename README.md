@@ -14,9 +14,14 @@
 > FoundationDB are experimental. See [Current state](docs/current-state.md) for the exact maturity
 > contract.
 
-An Effect-native fact database for applications that have to explain themselves.
+**The database that remembers why.** Triplex is an embedded fact database for TypeScript
+back-office systems, built on Effect. Every write records who made it, which versioned rules
+governed it, and when it was true, so audit questions and open work become queries instead of
+investigations.
 
 [Documentation](https://triplex.build) ·
+[Modeling guide for agents](https://triplex.build/agents) ·
+[`llms.txt`](https://triplex.build/llms.txt) ·
 [GitHub](https://github.com/bjacobso/triplex) ·
 [Security](SECURITY.md)
 
@@ -572,6 +577,7 @@ Public exports resolve only to built `dist` files.
 | Document                                                      | Purpose                                                      |
 | ------------------------------------------------------------- | ------------------------------------------------------------ |
 | [Getting started](docs/getting-started.md)                    | First runnable program, output, and persistence              |
+| [Modeling a back-office domain](docs/agents.md)               | Prescriptive guide for agents: mapping, rules, anti-patterns |
 | [Playground](docs/playground.md)                              | Local in-browser database with selectable domains            |
 | [Core concepts](docs/concepts.md)                             | Facts, time, configuration, derivation, and ownership        |
 | [Configuration walkthrough](docs/configuration-versioning.md) | Publish, promote, pin, inspect, and roll back config         |

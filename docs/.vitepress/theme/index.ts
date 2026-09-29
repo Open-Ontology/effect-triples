@@ -1,11 +1,9 @@
 import "@fontsource-variable/ibm-plex-sans";
 import "@fontsource/ibm-plex-mono/400.css";
-import TwoslashFloatingVue from "@shikijs/vitepress-twoslash/client";
 import type { Theme } from "vitepress";
 import DefaultTheme from "vitepress/theme-without-fonts";
 import { h } from "vue";
 
-import "@shikijs/vitepress-twoslash/style.css";
 import "./custom.css";
 import Playground from "./Playground.vue";
 import TriplexExplorer from "./TriplexExplorer.vue";
@@ -23,14 +21,5 @@ export default {
   enhanceApp({ app }) {
     app.component("TriplexPlayground", Playground);
     app.component("TriplexExplorer", TriplexExplorer);
-    app.use(TwoslashFloatingVue, {
-      themes: {
-        twoslash: {
-          flip: true,
-          triggers: ["hover", "click"],
-          popperTriggers: ["hover"],
-        },
-      },
-    });
   },
 } satisfies Theme;

@@ -1,22 +1,79 @@
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 
-import { transformerTwoslash } from "@shikijs/vitepress-twoslash";
 import tailwindcss from "@tailwindcss/vite";
-import ts from "typescript";
-import { defineConfig } from "vitepress";
+import { type DefaultTheme, defineConfig } from "vitepress";
 
 import { workspaceAliases } from "../../vitest.workspace-aliases.js";
+import { llmsDevServer, writeLlmsFiles } from "./llms.js";
+
+const srcDir = resolve(import.meta.dirname, "..");
+
+const sidebar: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Start",
+    items: [
+      { text: "Getting started", link: "/getting-started" },
+      { text: "Modeling a back-office domain", link: "/agents" },
+      { text: "Playground", link: "/playground" },
+      { text: "Core concepts", link: "/concepts" },
+      { text: "Current state", link: "/current-state" },
+    ],
+  },
+  {
+    text: "Learn",
+    items: [
+      { text: "Datalog", link: "/datalog" },
+      { text: "Configuration walkthrough", link: "/configuration-versioning" },
+      { text: "Derivations", link: "/derivations" },
+      { text: "Provenance", link: "/provenance" },
+    ],
+  },
+  {
+    text: "Reference",
+    items: [
+      { text: "Configuration", link: "/configuration" },
+      { text: "Operational primitives", link: "/operational-primitives" },
+      { text: "Configuration HTTP API", link: "/http-api" },
+      { text: "Performance", link: "/performance" },
+      {
+        text: "Architecture",
+        link: "https://github.com/bjacobso/triplex/blob/main/ARCHITECTURE.md",
+      },
+    ],
+  },
+  {
+    text: "Operate",
+    items: [
+      { text: "CLI and dashboard", link: "/tools" },
+      { text: "Data explorer", link: "/explorer" },
+      { text: "Host integration", link: "/host-integration" },
+      { text: "Troubleshooting and FAQ", link: "/troubleshooting" },
+      { text: "Releasing", link: "/releasing" },
+    ],
+  },
+  {
+    text: "Project",
+    items: [
+      { text: "Custom runtimes", link: "/custom-runtimes" },
+      { text: "Roadmap", link: "/roadmap" },
+    ],
+  },
+];
 
 export default defineConfig({
   lang: "en-US",
   title: "Triplex",
   titleTemplate: ":title · Triplex",
-  description: "A temporal fact database for TypeScript, built on Effect.",
+  description:
+    "The database that remembers why: an embedded fact database for TypeScript back-office systems, built on Effect.",
   cleanUrls: true,
+  // Snippet outputs are included into pages, never published as pages themselves.
+  srcExclude: ["snippets/**"],
   lastUpdated: true,
   outDir: resolve(import.meta.dirname, "../../dist"),
+  buildEnd: (site) => writeLlmsFiles(srcDir, site.outDir, sidebar),
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss(), llmsDevServer(srcDir, sidebar)],
     resolve: { alias: workspaceAliases() },
   },
   head: [
@@ -24,43 +81,24 @@ export default defineConfig({
     ["meta", { name: "theme-color", content: "#0b1020" }],
     ["meta", { property: "og:type", content: "website" }],
     ["meta", { property: "og:site_name", content: "Triplex" }],
+    // Machine-readable entry points for coding agents: https://llmstxt.org
+    ["link", { rel: "alternate", type: "text/plain", href: "/llms.txt", title: "llms.txt" }],
+    [
+      "link",
+      { rel: "alternate", type: "text/plain", href: "/llms-full.txt", title: "llms-full.txt" },
+    ],
   ],
   markdown: {
     theme: { light: "tokyo-night", dark: "tokyo-night" },
     languages: ["js", "json", "sh", "sql", "ts"],
-    codeTransformers: [
-      transformerTwoslash({
-        throws: true,
-        twoslashOptions: {
-          tsModule: ts,
-          tsLibDirectory: dirname(ts.getDefaultLibFilePath({})),
-          vfsRoot: resolve(import.meta.dirname, "../snippets/home"),
-          cache: process.env.NODE_ENV === "production",
-          fsCache: process.env.NODE_ENV === "production",
-          compilerOptions: {
-            target: ts.ScriptTarget.ES2024,
-            module: ts.ModuleKind.ESNext,
-            moduleResolution: ts.ModuleResolutionKind.Bundler,
-            allowImportingTsExtensions: true,
-            noEmit: true,
-            strict: true,
-            baseUrl: resolve(import.meta.dirname, "../.."),
-            paths: {
-              "@triplex-build/triplex": ["packages/core/src/index.ts"],
-              "@triplex-build/triplex/config": ["packages/core/src/config/index.ts"],
-            },
-          },
-        },
-      }),
-    ],
   },
   themeConfig: {
     logo: { src: "/mark.svg", alt: "Triplex" },
     siteTitle: "Triplex",
     nav: [
       { text: "Get started", link: "/getting-started" },
+      { text: "Modeling guide", link: "/agents" },
       { text: "Playground", link: "/playground" },
-      { text: "Explorer", link: "/explorer" },
       { text: "Concepts", link: "/concepts" },
       {
         text: "Reference",
@@ -73,55 +111,7 @@ export default defineConfig({
       },
       { text: "Operate", link: "/tools" },
     ],
-    sidebar: [
-      {
-        text: "Start",
-        items: [
-          { text: "Getting started", link: "/getting-started" },
-          { text: "Playground", link: "/playground" },
-          { text: "Core concepts", link: "/concepts" },
-          { text: "Current state", link: "/current-state" },
-        ],
-      },
-      {
-        text: "Learn",
-        items: [
-          { text: "Datalog", link: "/datalog" },
-          { text: "Configuration walkthrough", link: "/configuration-versioning" },
-          { text: "Derivations", link: "/derivations" },
-          { text: "Provenance", link: "/provenance" },
-        ],
-      },
-      {
-        text: "Reference",
-        items: [
-          { text: "Configuration", link: "/configuration" },
-          { text: "Operational primitives", link: "/operational-primitives" },
-          { text: "Configuration HTTP API", link: "/http-api" },
-          { text: "Performance", link: "/performance" },
-          {
-            text: "Architecture",
-            link: "https://github.com/bjacobso/triplex/blob/main/ARCHITECTURE.md",
-          },
-        ],
-      },
-      {
-        text: "Operate",
-        items: [
-          { text: "CLI and dashboard", link: "/tools" },
-          { text: "Host integration", link: "/host-integration" },
-          { text: "Troubleshooting and FAQ", link: "/troubleshooting" },
-          { text: "Releasing", link: "/releasing" },
-        ],
-      },
-      {
-        text: "Project",
-        items: [
-          { text: "Custom runtimes", link: "/custom-runtimes" },
-          { text: "Roadmap", link: "/roadmap" },
-        ],
-      },
-    ],
+    sidebar,
     search: {
       provider: "local",
       options: { detailedView: true },
