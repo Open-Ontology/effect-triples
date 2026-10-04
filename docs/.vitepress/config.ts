@@ -56,6 +56,7 @@ const sidebar: DefaultTheme.SidebarItem[] = [
     items: [
       { text: "Custom runtimes", link: "/custom-runtimes" },
       { text: "Roadmap", link: "/roadmap" },
+      { text: "Triplex and WorldVM", link: "/worldvm" },
     ],
   },
 ];
