@@ -16,7 +16,7 @@
   --vp-code-tab-hover-text-color: #f3f5ff;
   --vp-code-tab-active-text-color: #f3f5ff;
   --vp-nav-height: 72px;
-  --vp-layout-top-height: 32px;
+  --vp-layout-top-height: 0px;
 }
 
 .dark {
@@ -38,28 +38,60 @@ body {
   letter-spacing: -0.008em;
 }
 
-.triplex-prerelease {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: var(--vp-z-index-layout-top);
-  box-sizing: border-box;
+.worldvm-incubation {
   width: 100%;
-  height: var(--vp-layout-top-height);
-  border-bottom: 1px solid color-mix(in srgb, var(--vp-c-warning-1) 28%, var(--vp-c-divider));
-  background: color-mix(in srgb, #eab308 15%, var(--vp-c-bg));
-  color: var(--vp-c-text-1);
-  padding: 7px 16px;
-  overflow: hidden;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e7e5e4;
+  background: #f5f5f4;
+  color: #44403c;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
   font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: normal;
   text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.triplex-prerelease a {
-  color: var(--vp-c-warning-1);
+.worldvm-incubation p {
+  margin: 0;
+}
+
+.worldvm-incubation a {
+  color: inherit;
   font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.worldvm-incubation a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* Let the homepage banner scroll away without overlapping the navigation. */
+.triplex-index .VPNav {
+  position: sticky;
+  top: 0;
+}
+
+.triplex-index .VPNavBar .content-body {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.triplex-index .VPContent {
+  padding-top: 0;
+}
+
+/* The mobile menu fills the viewport beneath its navigation controls. */
+.triplex-index .VPNav:has(.screen-open) {
+  position: fixed;
 }
 
 .VPNavBar {
