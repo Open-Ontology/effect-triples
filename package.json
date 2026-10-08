@@ -11,7 +11,7 @@
     "clean": "turbo run clean",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm docs:check && pnpm test && pnpm build",
     "dev": "turbo watch build",
-    "docs:build": "vitepress build docs",
+    "docs:build": "vitepress build docs && node scripts/check-llms.mjs",
     "docs:check": "node scripts/check-markdown-code.mjs && tsc --noEmit -p docs/snippets/tsconfig.json && pnpm docs:outputs --check",
     "docs:outputs": "tsx --tsconfig docs/snippets/tsconfig.json docs/snippets/home/site-safety/run.ts",
     "docs:deploy": "alchemy deploy --stage prod",

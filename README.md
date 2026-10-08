@@ -614,6 +614,8 @@ pnpm test:foundationdb:integration
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete contribution contract.
 
+Part of the [WorldVM](https://worldvm.com) family of experiments.
+
 ## License
 
 MIT © 2026 Ben Jacobson.
