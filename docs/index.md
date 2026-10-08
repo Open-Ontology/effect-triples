@@ -11,36 +11,47 @@ pageClass: triplex-index
 <div class="triplex-home">
 
 <header class="triplex-home__intro">
-<p class="triplex-home__eyebrow">Triplex</p>
+<div class="triplex-home__hero-copy">
+<p class="triplex-home__eyebrow"><span class="triplex-home__dot" aria-hidden="true"></span> An embedded fact database · TypeScript + Effect</p>
+<div class="triplex-home__wordmark" aria-hidden="true">triplex<span>_</span></div>
 <h1>The database that remembers why.</h1>
-<p class="triplex-home__tagline">An embedded fact database for TypeScript back-office systems.</p>
-<p class="triplex-home__detail">Every write records who made it, which versioned rules governed it, and when it was true. Audit questions and open work become queries instead of investigations.</p>
+<p class="triplex-home__tagline">Facts change. Rules change. Your record of what happened shouldn’t.</p>
+<p class="triplex-home__detail">Triplex keeps facts, time, and versioned rules together. Every write records <strong>who acted</strong>, <strong>which rules applied</strong>, and <strong>when it was true</strong>. Audit questions and open work become queries instead of investigations.</p>
+
+<div class="triplex-home__actions">
+<a class="triplex-home__primary" href="/getting-started">Get started<span class="vpi-arrow-right triplex-home__link-icon" aria-hidden="true"></span></a>
+<a class="triplex-home__secondary triplex-home__button" href="#one-scenario">Follow one decision <span aria-hidden="true">↓</span></a>
+</div>
+<p class="triplex-home__status">Pre-1.0 · MIT licensed · In-memory + SQLite supported<br>PostgreSQL is a production candidate · <a href="/current-state">Current state ↗</a></p>
+</div>
+<DecisionTrace />
+</header>
+
+<div class="triplex-home__install">
+<span class="triplex-home__eyebrow">Start in your process</span>
 
 ```sh
 npm install @triplex-build/triplex effect@4.0.0-rc.112
 ```
 
-<div class="triplex-home__actions">
-<a class="triplex-home__primary" href="/getting-started">Get started<span class="vpi-arrow-right triplex-home__link-icon" aria-hidden="true"></span></a>
-<a class="triplex-home__secondary" href="/agents">Modeling guide for agents</a>
-<a class="triplex-home__secondary" href="/llms.txt">llms.txt</a>
+<span class="triplex-home__install-note">Effect 4 required · <a href="/getting-started">First program →</a></span>
+
 </div>
-<p class="triplex-home__status">Pre-1.0 · Built on Effect 4 (<code>effect@4.0.0-rc.112</code>; Effect 3 is not compatible) · In-memory and SQLite supported · PostgreSQL is a production candidate · <a href="/current-state">Maturity contract</a></p>
-</header>
+
+<nav class="triplex-home__strip" aria-label="What Triplex keeps together">
+<a href="#what-did-we-know"><span class="triplex-home__strip-symbol" aria-hidden="true">t₁ / t₂</span><strong>Two clocks.</strong><span>What was true. What you knew.</span></a>
+<a href="#which-rules"><span class="triplex-home__strip-symbol" aria-hidden="true">#</span><strong>Pinned rules.</strong><span>The release behind every decision.</span></a>
+<a href="#what-happens-next"><span class="triplex-home__strip-symbol" aria-hidden="true">=&gt;</span><strong>Derived work.</strong><span>What should happen next.</span></a>
+</nav>
 
 <aside class="triplex-home__agents" aria-labelledby="for-agents">
 <h2 id="for-agents">Reading this as a coding agent?</h2>
-<ul>
-<li><strong>Get the docs as Markdown.</strong> <a href="/llms.txt"><code>/llms.txt</code></a> is the index and <a href="/llms-full.txt"><code>/llms-full.txt</code></a> is every guide in one file. You can also append <code>.md</code> to any page URL, for example <a href="/agents.md"><code>/agents.md</code></a>.</li>
-<li><strong>Start with <a href="/agents">Modeling a back-office domain</a>.</strong> It maps domain concepts to Triplex primitives and lists the rules every command should follow.</li>
-<li><strong>Everything on this page is checked.</strong> Each snippet is type-checked, and each output is produced by running the snippets in CI (<a href="https://github.com/bjacobso/triplex/tree/main/docs/snippets/home/site-safety"><code>docs/snippets/home/site-safety</code></a>).</li>
-<li><strong>Inspect a real database.</strong> The CLI is non-interactive and prints JSON: <code>triplex --sqlite ./app.db describe</code>. See <a href="/tools">CLI and dashboard</a>.</li>
-</ul>
+<p>Start with the <a href="/agents">Modeling guide for agents</a>. Get the index at <a href="/llms.txt">/llms.txt</a>, every guide at <a href="/llms-full.txt">/llms-full.txt</a>, or append <code>.md</code> to any page URL. The <a href="/tools">CLI</a> prints JSON.</p>
 </aside>
 
 <section class="triplex-home__section" aria-labelledby="the-problem">
 <div class="triplex-home__section-intro">
-<p class="triplex-home__eyebrow">The problem</p>
+<p class="triplex-home__eyebrow">00 / The missing context</p>
 <h2 id="the-problem">“Why?” is the most expensive question a back-office system gets asked.</h2>
 <p>An auditor asks: <em>was Maria trained for the Harbor site on the day she started there?</em> In a typical stack, the evidence is spread across systems that never shared an identity model or a clock.</p>
 </div>
@@ -57,10 +68,10 @@ npm install @triplex-build/triplex effect@4.0.0-rc.112
 
 <section class="triplex-home__section triplex-home__code" aria-labelledby="one-scenario">
 <div class="triplex-home__section-intro">
-<p class="triplex-home__eyebrow">One scenario, start to finish</p>
+<p class="triplex-home__eyebrow">01 / One scenario, start to finish</p>
 <h2 id="one-scenario">Maria, the Harbor site, and a certificate that was wrong.</h2>
 <p>Maria is trained for Harbor from March 1 to June 1 and placed there on March 2 under release <code>hr-2026.1</code>. The rules then change: <code>hr-2026.2</code> requires a supervisor on every placement. Later, an auditor finds that the certificate actually began on March 5.</p>
-<p>After the scenario runs, the database’s own journal reads:</p>
+<p>Every snippet is type-checked. Every output is produced by <a href="https://github.com/bjacobso/triplex/tree/main/docs/snippets/home/site-safety">running this scenario in CI</a>. The database’s own journal reads:</p>
 </div>
 
 <div class="triplex-home__timeline">
@@ -87,7 +98,7 @@ npm install @triplex-build/triplex effect@4.0.0-rc.112
 
 <section class="triplex-home__section triplex-home__code" aria-labelledby="three-questions">
 <div class="triplex-home__section-intro">
-<p class="triplex-home__eyebrow">Three questions, three queries</p>
+<p class="triplex-home__eyebrow">02 / Three questions, three queries</p>
 <h2 id="three-questions">Ask what you knew, which rules applied, and what happens next.</h2>
 <p>Each answer below is the real output of the code beside it.</p>
 </div>
@@ -157,7 +168,7 @@ npm install @triplex-build/triplex effect@4.0.0-rc.112
 
 <section class="triplex-home__section" aria-labelledby="work-is-a-query">
 <div class="triplex-home__section-intro">
-<p class="triplex-home__eyebrow">Derived work</p>
+<p class="triplex-home__eyebrow">03 / Derived work</p>
 <h2 id="work-is-a-query">Stop enqueuing obligations. Reconcile them.</h2>
 <p>Most back-office bugs come down to a task that should exist but doesn’t, or one that exists but shouldn’t. Event handlers create work one step at a time and drift out of sync with the data. A derivation states what should be true, and reconciliation reports the difference.</p>
 </div>
@@ -189,7 +200,7 @@ npm install @triplex-build/triplex effect@4.0.0-rc.112
 
 <section class="triplex-home__section" aria-labelledby="modeling">
 <div class="triplex-home__section-intro">
-<p class="triplex-home__eyebrow">Modeling</p>
+<p class="triplex-home__eyebrow">04 / Modeling</p>
 <h2 id="modeling">From a back-office domain to Triplex primitives.</h2>
 <p>Most back-office systems are built from the same parts. This is where each part goes.</p>
 </div>
@@ -211,7 +222,7 @@ npm install @triplex-build/triplex effect@4.0.0-rc.112
 
 <section class="triplex-home__section" aria-labelledby="runs-where">
 <div class="triplex-home__section-intro">
-<p class="triplex-home__eyebrow">Deployment</p>
+<p class="triplex-home__eyebrow">05 / Deployment</p>
 <h2 id="runs-where">A library, not another server.</h2>
 <p>Triplex runs inside your process as Effect layers. Switching storage changes the layer you provide, and the rest of the program stays the same. On PostgreSQL, Triplex can share your application’s transaction, so your own rows, Triplex facts, the journal, and an outbox row commit or roll back together.</p>
 </div>
@@ -231,7 +242,7 @@ npm install @triplex-build/triplex effect@4.0.0-rc.112
 
 <section class="triplex-home__section" aria-labelledby="fit">
 <div class="triplex-home__section-intro">
-<p class="triplex-home__eyebrow">Fit</p>
+<p class="triplex-home__eyebrow">06 / Fit</p>
 <h2 id="fit">When to use Triplex, and when not to.</h2>
 </div>
 <div class="triplex-home__principles">
@@ -248,6 +259,20 @@ npm install @triplex-build/triplex effect@4.0.0-rc.112
 <p><strong>Datomic and XTDB</strong> share the model of immutable facts, Datalog, and time travel; Triplex embeds in TypeScript and adds versioned rules and reconciled work. <strong>Event sourcing</strong> gives you history, but you hand-write every projection. <strong>Workflow engines</strong> run durable code; Triplex decides what work should exist, and the two compose.</p>
 </div>
 </div>
+</section>
+
+<section class="triplex-home__family" aria-labelledby="family-title">
+<p class="triplex-home__eyebrow">07 / Part of the WorldVM family</p>
+<div class="triplex-home__family-head">
+<h2 id="family-title">A memory for your world.</h2>
+<p>Small experiments in software you can inspect, explain, and build on. Triplex keeps the facts. These projects explore the language and models around them.</p>
+</div>
+<div class="triplex-home__family-grid">
+<a class="no-icon" href="https://github.com/bjacobso/forma" style="--project-color: #c6bed9"><span class="triplex-home__swatch" aria-hidden="true"></span><strong>Forma ↗</strong><span>A typed Lisp for building your own domain language.</span></a>
+<a class="no-icon" href="https://schematics.run" style="--project-color: #b794f6"><span class="triplex-home__swatch" aria-hidden="true"></span><strong>Schematics ↗</strong><span>Small Effect libraries that make application rules inspectable.</span></a>
+<a class="no-icon" href="https://open-ontology.com" style="--project-color: #b7c8a4"><span class="triplex-home__swatch" aria-hidden="true"></span><strong>Open Ontology ↗</strong><span>Configuration as code, checked across platforms.</span></a>
+</div>
+<a class="triplex-home__family-link no-icon" href="https://worldvm.com/">Meet the whole family at worldvm.com ↗</a>
 </section>
 
 <nav class="triplex-home__guides" aria-label="Guides">

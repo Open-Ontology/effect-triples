@@ -59,6 +59,25 @@ test("home examples remain visible on mobile without page overflow", async ({ pa
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 
+test("decision receipt preserves its rules while switching recorded knowledge", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const receipt = page.locator(".decision-trace");
+  const original = receipt.getByRole("button", { name: "At the decision", exact: true });
+  const corrected = receipt.getByRole("button", { name: "After the correction", exact: true });
+  await expect(original).toHaveAttribute("aria-pressed", "true");
+  await expect(receipt.locator(".decision-trace__result strong")).toHaveText("true");
+  await corrected.click();
+  await expect(corrected).toHaveAttribute("aria-pressed", "true");
+  await expect(original).toHaveAttribute("aria-pressed", "false");
+  await expect(receipt.locator(".decision-trace__result strong")).toHaveText("false");
+  await expect(receipt).toContainText("The corrected certificate starts March 5.");
+  await expect(receipt.locator(".decision-trace__fields")).toContainText("hr-2026.1");
+  await original.click();
+  await expect(receipt.locator(".decision-trace__result strong")).toHaveText("true");
+});
+
 test("agent-readable documentation is served as plain text", async ({ request }) => {
   const index = await request.get("/llms.txt");
   expect(index.ok()).toBe(true);
