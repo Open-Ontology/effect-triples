@@ -237,6 +237,8 @@ npm install @triplex-build/triplex effect@4.0.0-rc.112
 | Cloudflare Durable Objects | private workspace package         | Experimental                    |
 | FoundationDB               | private workspace package         | Experimental                    |
 
+<p class="triplex-home__fit">Want to build on another storage engine? Explore the <a href="/backends">backend blueprints</a>: working SQLite, experimental FoundationDB, and proposed Datomic and XTDB adapters. Each maps storage primitives to the Triplex contract and identifies what still needs to be built.</p>
+
 <p class="triplex-home__fit">Also in the box: a JSON-first <a href="/tools">CLI</a> for agents, a browser <a href="/explorer">data explorer</a>, a <a href="/http-api">configuration-derived HTTP API</a> with OpenAPI, and an in-browser <a href="/playground">playground</a>.</p>
 </section>
 
@@ -256,7 +258,7 @@ npm install @triplex-build/triplex effect@4.0.0-rc.112
 </div>
 <div>
 <h3>How it relates</h3>
-<p><strong>Datomic and XTDB</strong> share the model of immutable facts, Datalog, and time travel; Triplex embeds in TypeScript and adds versioned rules and reconciled work. <strong>Event sourcing</strong> gives you history, but you hand-write every projection. <strong>Workflow engines</strong> run durable code; Triplex decides what work should exist, and the two compose.</p>
+<p><a href="/datomic">Datomic</a> offers facts, Datalog, and historical database views. <a href="/xtdb">Current XTDB</a> offers bitemporal data through SQL and XTQL. Triplex embeds in TypeScript and connects facts to versioned rules and reconciled work. <strong>Event sourcing</strong> gives you history, but you hand-write every projection. <strong>Workflow engines</strong> run durable code; Triplex decides what work should exist, and the two compose.</p>
 </div>
 </div>
 </section>

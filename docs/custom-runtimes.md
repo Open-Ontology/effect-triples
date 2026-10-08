@@ -8,6 +8,10 @@ For application-level database composition, see [Host integration](/host-integra
 describes implementing a storage or execution backend. Workflows, authorization, routing, timers,
 and external effects remain host responsibilities.
 
+For concrete storage mappings and implementation plans, explore the [backend blueprints](/backends):
+[SQLite](/sqlite) is a working reference, [FoundationDB](/foundationdb) is experimental, and
+[Datomic](/datomic) and [XTDB](/xtdb) are proposed designs with no adapters yet.
+
 ## Runtime definitions
 
 A definition supplies Effect layers. Binding a database identity produces a layer providing the

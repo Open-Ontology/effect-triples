@@ -8,6 +8,8 @@
       "@triplex-build/triplex": ["packages/core/src/index.ts"],
       "@triplex-build/triplex/config": ["packages/core/src/config/index.ts"],
       "@triplex-build/triplex-sqlite": ["packages/sqlite/src/index.ts"],
+      "@triplex-build/triplex-foundationdb": ["packages/foundationdb/src/index.ts"],
+      "@triplex-build/triplex/runtime": ["packages/core/src/runtime/index.ts"],
       "@triplex-build/triplex/content": ["packages/core/src/content/index.ts"],
       "@triplex-build/triplex/derivation": ["packages/core/src/derivation/index.ts"],
       "@triplex-build/triplex-postgres": ["packages/postgres/src/index.ts"],

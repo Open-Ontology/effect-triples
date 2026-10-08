@@ -52,6 +52,16 @@ const sidebar: DefaultTheme.SidebarItem[] = [
     ],
   },
   {
+    text: "Backend blueprints",
+    items: [
+      { text: "Overview", link: "/backends" },
+      { text: "SQLite · supported", link: "/sqlite" },
+      { text: "FoundationDB · experimental", link: "/foundationdb" },
+      { text: "Datomic · proposed", link: "/datomic" },
+      { text: "XTDB · proposed", link: "/xtdb" },
+    ],
+  },
+  {
     text: "Project",
     items: [
       { text: "Custom runtimes", link: "/custom-runtimes" },
@@ -107,6 +117,7 @@ export default defineConfig({
           { text: "Configuration", link: "/configuration" },
           { text: "Operational primitives", link: "/operational-primitives" },
           { text: "HTTP API", link: "/http-api" },
+          { text: "Backend blueprints", link: "/backends" },
         ],
       },
       { text: "Operate", link: "/tools" },
