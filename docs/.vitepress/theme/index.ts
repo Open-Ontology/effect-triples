@@ -6,6 +6,7 @@ import { defineComponent, h } from "vue";
 
 import "./custom.css";
 import "./home.css";
+import "./blueprint.css";
 import Playground from "./Playground.vue";
 import TriplexExplorer from "./TriplexExplorer.vue";
 import DecisionTrace from "./DecisionTrace.vue";
