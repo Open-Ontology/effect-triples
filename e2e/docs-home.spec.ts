@@ -81,6 +81,7 @@ test("decision receipt preserves its rules while switching recorded knowledge", 
 test("agent-readable documentation is served as plain text", async ({ request }) => {
   const index = await request.get("/llms.txt");
   expect(index.ok()).toBe(true);
+  expect(index.headers()["content-type"]).toContain("text/plain");
   const body = await index.text();
   expect(body).toMatch(/^# Triplex\n\n> The database that remembers why/);
   expect(body).toContain("(https://triplex.build/agents.md)");
